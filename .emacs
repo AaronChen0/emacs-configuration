@@ -1,3 +1,10 @@
+(add-to-list 'load-path "~/.emacs.d/my/")
+(load "external-open")
+(load "search")
+(load "add-to-list-config")
+(load "add-hook-config")
+(load "mit-scheme-settings")
+
 (setq delete-by-moving-to-trash t)
 (setq display-time-24hr-format t)
 (setq display-time-default-load-average nil)
@@ -12,30 +19,23 @@
 (setq user-full-name "Aaron Chen")
 (setq initial-scratch-message ";; Good day, Aaron.\n\n")
 
-(electric-pair-mode 1)
-(tool-bar-mode -1)
 (column-number-mode 1)
-(show-paren-mode 1)
-(display-time-mode 1)
+(delete-selection-mode 1)
 (display-time)
+(display-time-mode 1)
+(electric-pair-mode 1)
 (fset 'yes-or-no-p 'y-or-n-p)
-(mouse-avoidance-mode 'proteus)
 (global-prettify-symbols-mode 1)
+(mouse-avoidance-mode 'proteus)
 (setq-default make-backup-files nil)
+(show-paren-mode 1)
+(tool-bar-mode -1)
+(setq-default indent-tabs-mode nil)
 (set-language-environment 'utf-8)
 (set-fontset-font
  (frame-parameter nil 'font)
  'han
  (font-spec :family "文泉驿等宽微米黑" :size 14))
-
-(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
-(add-hook 'lisp-interaction-mode-hook 'eldoc-mode)
-
-(add-to-list 'load-path "~/.emacs.d/my/")
-(load "external-open")
-(load "search")
-(load "elpa-add-to-list")
-(require 'htmlize)
 
 ;; auto-complete
 (require 'auto-complete-config)
@@ -48,6 +48,9 @@
 	    (add-to-list 'ac-sources 'ac-source-c-headers)
 	    (add-to-list 'ac-sources 'ac-source-c-header-symbols t)))
 
+(recentf-mode 1)
+(global-set-key (kbd "C-x C-r") 'recentf-open-files)
+(require 'htmlize)
 (require 'ido)
 (ido-mode 1)
 
