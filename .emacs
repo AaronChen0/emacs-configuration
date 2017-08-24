@@ -1,14 +1,20 @@
+(defun open-dot-emacs ()
+  (interactive)
+  (find-file "~/.emacs"))
+(global-set-key (kbd "C-c C-d") 'open-dot-emacs)
+
 (add-to-list 'load-path "~/.emacs.d/my/")
-(load "external-open")
-(load "search")
 (load "add-to-list-config")
 (load "add-hook-config")
-(load "mit-scheme-settings")
+(load "external-open")
+(load "search")
 
 (setq delete-by-moving-to-trash t)
 (setq display-time-24hr-format t)
 (setq display-time-default-load-average nil)
-(setq frame-title-format "Emacs")
+(setq frame-title-format
+      (list (format "%s %%S: %%j " (system-name))
+	    '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 (setq inhibit-startup-screen t)
 (setq visible-bell t)
 (setq default-frame-alist
@@ -48,6 +54,9 @@
 	    (add-to-list 'ac-sources 'ac-source-c-headers)
 	    (add-to-list 'ac-sources 'ac-source-c-header-symbols t)))
 
+(require 'yasnippet)
+(yas-global-mode 1)
+
 (recentf-mode 1)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (require 'htmlize)
@@ -55,11 +64,12 @@
 (ido-mode 1)
 
 ;; package management
-(package-initialize)
 (setq package-archives
-      '(("melpa" . "http://melpa.org/packages/")
+      '(("melpa" . "https://melpa.org/packages/")
 	("melpa-stable" . "http://stable.melpa.org/#/")))
+(package-initialize)
 
+(autoload 'run-scheme "mit-scheme-settings" "run a scheme process" t)
 (autoload 'paredit-mode "paredit"
   "Minor mode for pseudo-structurally editing Lisp code."
   t)
@@ -78,7 +88,11 @@
 (setq-default c-default-style "linux"
 	      c-basic-offset 4)
 
-(defun open-dot-emacs ()
+;; Python
+(setq python-shell-interpreter "python3")
+
+(defun insert-time-stamp ()
   (interactive)
-  (find-file "~/.emacs"))
-(global-set-key (kbd "C-c C-d") 'open-dot-emacs)
+  (insert (format-time-string "%a %Y-%m-%d %T")))
+(global-set-key (kbd "C-c x") 'insert-time-stamp)
+
