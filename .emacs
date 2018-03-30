@@ -65,7 +65,8 @@
 
 ;; package management
 (setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
+      '(("elpa" .  "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
 	("melpa-stable" . "http://stable.melpa.org/#/")))
 (package-initialize)
 
@@ -84,6 +85,17 @@
 (setq slime-net-coding-system 'utf-8-unix)
 (slime-setup '(slime-fancy))
 
+(require 'ac-slime)
+(add-hook 'slime-mode-hook 'set-up-slime-ac)
+(add-hook 'slime-repl-mode-hook 'set-up-slime-ac)
+(eval-after-load "auto-complete"
+  '(add-to-list 'ac-modes 'slime-repl-mode))
+
+;; elisp
+(require 'elisp-slime-nav)
+(dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
+  (add-hook hook 'elisp-slime-nav-mode))
+
 ;; C Language
 (setq-default c-default-style "linux"
 	      c-basic-offset 4)
@@ -94,5 +106,11 @@
 (defun insert-time-stamp ()
   (interactive)
   (insert (format-time-string "%a %Y-%m-%d %T")))
-(global-set-key (kbd "C-c x") 'insert-time-stamp)
 
+(global-set-key (kbd "C-c x") 'insert-time-stamp)
+(global-set-key (kbd "S-<return>")
+                (lambda () (interactive) (move-end-of-line 1) (newline)))
+(global-set-key (kbd "C-c c")
+                (lambda () (interactive)
+                  (let ((revert-without-query '("")))  
+                    (revert-buffer-with-coding-system 'chinese-gbk))))
