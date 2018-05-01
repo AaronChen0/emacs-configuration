@@ -1,10 +1,16 @@
 (defun open-dot-emacs ()
   (interactive)
   (find-file "~/.emacs"))
-(global-set-key (kbd "C-c C-d") 'open-dot-emacs)
+(global-set-key (kbd "C-c e") 'open-dot-emacs)
+
+(defun switch-to-scratch ()
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+(global-set-key (kbd "C-c s") 'switch-to-scratch)
 
 (add-to-list 'load-path "~/.emacs.d/my/")
-(load load-prefer-newer t)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(setq load-prefer-newer t)
 (load "add-to-list-config")
 (load "add-hook-config")
 (load "external-open")
@@ -25,6 +31,8 @@
 	(top . 0)))
 (setq user-full-name "Aaron Chen")
 (setq initial-scratch-message ";; Good day, Aaron.\n\n")
+(setq blink-cursor-mode nil)
+(setq comint-prompt-read-only t)
 
 (column-number-mode 1)
 (delete-selection-mode 1)
@@ -68,7 +76,7 @@
 (setq package-archives
       '(("elpa" .  "https://elpa.gnu.org/packages/")
         ("melpa" . "https://melpa.org/packages/")
-	("melpa-stable" . "http://stable.melpa.org/#/")))
+	("melpa-stable" . "https://stable.melpa.org/packages/")))
 (package-initialize)
 
 (autoload 'run-scheme "mit-scheme-settings" "run a scheme process" t)
@@ -107,11 +115,39 @@
 (defun insert-time-stamp ()
   (interactive)
   (insert (format-time-string "%a %Y-%m-%d %T")))
-
 (global-set-key (kbd "C-c x") 'insert-time-stamp)
+
+(defun kill-other-buffers ()
+  "Kill all other buffers."
+  (interactive)
+  (mapc 'kill-buffer
+        (delq (current-buffer)
+              (buffer-list))))
+
+(defun kill-all-dired-buffers()
+  "Kill all dired buffers."
+  (interactive)
+  (save-excursion
+    (let((count 0))
+      (dolist(buffer (buffer-list))
+        (set-buffer buffer)
+        (when (equal major-mode 'dired-mode)
+          (setq count (1+ count))
+          (kill-buffer buffer)))
+      (message "Killed %i dired buffer(s)." count ))))
+(global-set-key (kbd "C-c k") 'kill-other-buffers)
+(global-set-key (kbd "C-c C-a k") 'kill-all-dired-buffers)
+
 (global-set-key (kbd "S-<return>")
-                (lambda () (interactive) (move-end-of-line 1) (newline)))
+                (lambda () (interactive) (move-end-of-line 1) (newline-and-indent)))
+
 (global-set-key (kbd "C-c c")
                 (lambda () (interactive)
                   (let ((revert-without-query '("")))  
                     (revert-buffer-with-coding-system 'chinese-gbk))))
+
+(global-set-key [f5]
+                '(lambda ()
+                   "Refresh the buffer from the disk"
+                   (interactive)
+                   (revert-buffer t (not (buffer-modified-p)) t)))
