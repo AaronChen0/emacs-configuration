@@ -4,6 +4,7 @@
 (global-set-key (kbd "C-c C-d") 'open-dot-emacs)
 
 (add-to-list 'load-path "~/.emacs.d/my/")
+(load load-prefer-newer t)
 (load "add-to-list-config")
 (load "add-hook-config")
 (load "external-open")
