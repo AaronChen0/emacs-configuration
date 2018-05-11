@@ -33,6 +33,7 @@
 (setq initial-scratch-message ";; Good day, Aaron.\n\n")
 (setq blink-cursor-mode nil)
 (setq comint-prompt-read-only t)
+(setq dired-listing-switches "-al --color=auto --group-directories-first")
 
 (column-number-mode 1)
 (delete-selection-mode 1)
@@ -51,6 +52,10 @@
  (frame-parameter nil 'font)
  'han
  (font-spec :family "文泉驿等宽微米黑" :size 14))
+
+;; remote file editing
+(require 'tramp)
+(setq tramp-default-method "scp")
 
 ;; auto-complete
 (require 'auto-complete-config)
@@ -74,8 +79,8 @@
 
 ;; package management
 (setq package-archives
-      '(("elpa" .  "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
+      '(("melpa" . "https://melpa.org/packages/")
+;       ("elpa" .  "https://elpa.gnu.org/packages/")
 	("melpa-stable" . "https://stable.melpa.org/packages/")))
 (package-initialize)
 
@@ -112,6 +117,23 @@
 ;; Python
 (setq python-shell-interpreter "python3")
 
+;; Javascript
+(require 'web-beautify)
+(eval-after-load 'js
+  '(define-key js-mode-map (kbd "C-c b") 'web-beautify-js))
+
+(eval-after-load 'json-mode
+  '(define-key json-mode-map (kbd "C-c b") 'web-beautify-js))
+
+(eval-after-load 'sgml-mode
+  '(define-key html-mode-map (kbd "C-c b") 'web-beautify-html))
+
+(eval-after-load 'web-mode
+  '(define-key web-mode-map (kbd "C-c b") 'web-beautify-html))
+
+(eval-after-load 'css-mode
+  '(define-key css-mode-map (kbd "C-c b") 'web-beautify-css))
+
 (defun insert-time-stamp ()
   (interactive)
   (insert (format-time-string "%a %Y-%m-%d %T")))
@@ -143,7 +165,7 @@
 
 (global-set-key (kbd "C-c c")
                 (lambda () (interactive)
-                  (let ((revert-without-query '("")))  
+                  (let ((revert-without-query '("")))
                     (revert-buffer-with-coding-system 'chinese-gbk))))
 
 (global-set-key [f5]
@@ -151,3 +173,12 @@
                    "Refresh the buffer from the disk"
                    (interactive)
                    (revert-buffer t (not (buffer-modified-p)) t)))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (go-mode js-auto-beautify markdown-mode gh-md yasnippet sudoku paredit magit helm graphviz-dot-mode elisp-slime-nav ac-slime ac-octave ac-c-headers))))
