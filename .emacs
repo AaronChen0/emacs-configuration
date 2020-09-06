@@ -21,7 +21,7 @@
 (setq user-full-name "Aaron Chen")
 (setq initial-scratch-message ";; Good day, Aaron.\n\n")
 (setq comint-prompt-read-only t)
-(setq dired-listing-switches "-al --group-directories-first")
+(setq dired-listing-switches "-al --group-directories-first -v")
 (setq make-backup-files nil)
 (setq-default indent-tabs-mode nil)
 
@@ -38,7 +38,6 @@
 (tool-bar-mode 0)
 (set-language-environment 'utf-8)
 (add-to-list 'load-path "~/.emacs.d/my/")
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 (when window-system
   (set-fontset-font
@@ -65,7 +64,10 @@
 
 ;; package management
 (setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")))
+      '(("melpa" . "https://melpa.org/packages/")
+        ("elpa"  . "https://elpa.gnu.org/packages/")))
+(when (< emacs-major-version 27)
+  (package-initialize))
 
 (require 'use-package)
 (setq use-package-compute-statistics t)
@@ -83,7 +85,9 @@
   (add-to-list 'ac-dictionary-directories
 	       "~/.emacs.d/elpa/auto-complete-20170124.1845/dict")
   (add-to-list 'ac-modes 'slime-repl-mode)
-  (ac-config-default))
+  (add-to-list 'ac-modes 'lisp-mode)
+  (ac-config-default)
+  (global-auto-complete-mode t))
 
 (use-package ac-c-headers
   :defer t
@@ -98,7 +102,6 @@
 
 ;; maxima
 (add-to-list 'auto-mode-alist '("\\.ma[cx]" . maxima-mode))
-(add-to-list 'load-path "/usr/local/share/maxima/5.41.0/emacs/")
 (autoload 'imaxima "imaxima" "Frontend of Maxima CAS" t)
 (autoload 'maxima-mode "maxima" "Major mode for writing Maxima programs" t)
 (autoload 'imath "imath" "Interactive Math mode" t)
@@ -107,11 +110,6 @@
 (setq imaxima-fnt-size "large")
 (setq imaxima-pt-size 9)
 (setq maxima-save-input-history t)
-
-(use-package yasnippet
-  :defer 5
-  :config
-  (yas-global-mode 1))
 
 (use-package recentf
   :defer 5
@@ -127,11 +125,23 @@
 (autoload 'run-scheme "mit-scheme-settings" "run a scheme process" t)
 (autoload 'paredit-mode "paredit" t)
 
+(defun override-slime-repl-bindings-with-paredit ()
+  (define-key slime-repl-mode-map
+    (read-kbd-macro paredit-backward-delete-key) nil))
+(add-hook 'slime-repl-mode-hook 'override-slime-repl-bindings-with-paredit)
+
 ;; Common Lisp
 (use-package slime
   :commands slime
   :load-path "~/slime/"
+  :bind
   :config
+  (global-set-key "\C-z" 'slime-selector)
+  (bind-key* "M-s" 'paredit-splice-sexp)
+  (cd "~/code/cl")
+  (setq slime-load-failed-fasl 'never)
+  (setq common-lisp-hyperspec-root
+        (concat "file://" (expand-file-name "~/OnePiece/AI/LISP/HyperSpec/HyperSpec/")))
   (setq
    slime-lisp-implementations
    '((sbcl ("/usr/local/bin/sbcl" "--dynamic-space-size" "1024"))
@@ -140,7 +150,7 @@
   (slime-setup '(slime-fancy)))
 
 (use-package ac-slime
-  :hook ((slime-mode-hook slime-repl-mode-hook) . set-up-slime-ac))
+  :hook ((slime-mode-hook slime-repl-mode-hook lisp-mode-hook) . set-up-slime-ac))
 
 ;; elisp
 (use-package elisp-slime-nav
@@ -155,6 +165,7 @@
 
 ;; Javascript
 (use-package web-beautify
+  :defer t
   :config
   (eval-after-load 'js
     '(define-key js-mode-map (kbd "C-c b") 'web-beautify-js))
@@ -166,3 +177,10 @@
     '(define-key web-mode-map (kbd "C-c b") 'web-beautify-html))
   (eval-after-load 'css-mode
     '(define-key css-mode-map (kbd "C-c b") 'web-beautify-css)))
+
+(use-package markdown-mode
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "pandoc"))
